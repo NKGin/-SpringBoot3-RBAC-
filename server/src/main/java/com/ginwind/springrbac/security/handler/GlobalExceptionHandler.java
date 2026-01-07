@@ -1,5 +1,6 @@
 package com.ginwind.springrbac.security.handler;
 
+import com.ginwind.springrbac.constant.MessageConstant;
 import com.ginwind.springrbac.result.Result;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,6 +13,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationDeniedException.class)
     @ResponseBody
     public Result handleAccessDenied(AuthorizationDeniedException e) {
-        return Result.error("权限不足，禁止访问");
+        return Result.error(MessageConstant.INSUFFICIENT_PERMISSIONS);
     }
 }

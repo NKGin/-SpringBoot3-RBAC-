@@ -1,6 +1,7 @@
 package com.ginwind.springrbac.security.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.ginwind.springrbac.constant.MessageConstant;
 import com.ginwind.springrbac.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +23,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
         response.getWriter().write(
                 JSON.toJSONString(
-                        Result.error("权限不足，禁止访问")
+                        Result.error(MessageConstant.INSUFFICIENT_PERMISSIONS)
                 )
         );
     }

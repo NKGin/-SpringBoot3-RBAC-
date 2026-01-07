@@ -2,6 +2,7 @@ package com.ginwind.springrbac.security.handler;
 
 import com.alibaba.fastjson.JSON;
 
+import com.ginwind.springrbac.constant.MessageConstant;
 import com.ginwind.springrbac.result.Result;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -29,19 +30,19 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         String msg;
 
         if (exception instanceof BadCredentialsException) {
-            msg = "用户名或密码错误";
+            msg = MessageConstant.LOGIN_ERROR;
 
         } else if (exception instanceof LockedException) {
-            msg = "账号已被锁定";
+            msg = MessageConstant.ACCOUNT_LOCKED;
 
         } else if (exception instanceof DisabledException) {
-            msg = "账号已被禁用";
+            msg = MessageConstant.ACCOUNT_BANED;
 
         } else if (exception instanceof AccountExpiredException) {
-            msg = "账号已过期";
+            msg = MessageConstant.ACCOUNT_EXPIRED;
 
         } else if (exception instanceof CredentialsExpiredException) {
-            msg = "密码已过期";
+            msg = MessageConstant.PASSWORD_EXPIRED;
         } else {
             msg =  exception.getMessage();
         }

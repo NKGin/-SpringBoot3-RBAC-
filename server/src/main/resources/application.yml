@@ -38,22 +38,22 @@ spring:
 jwt:
     #管理端jwt配置
     # 设置jwt签名加密时使用的秘钥
-  admin-secret-key: "ginwind_jwt_secret_key_1234567890123456"
+  admin-secret-key: ${rbac.jwt.admin-secret-key}
     # 设置jwt过期时间
-  admin-ttl: 3600000
+  admin-ttl: ${rbac.jwt.admin-ttl}
     # 设置前端传递过来的令牌名称
-  admin-token-name: token
+  admin-token-name: ${rbac.jwt.admin-token-name}
     # Token存储在redis里的键
-  token-redis-key: "token_"
+  token-redis-key: ${rbac.jwt.token-redis-key}
 
 
   # 用户端jwt配置
     # 设置jwt签名加密时使用的秘钥
-  user-secret-key: itheima
+  user-secret-key: ${rbac.jwt.user-secret-key}
     # 设置jwt过期时间
-  user-ttl: 7200000
+  user-ttl: ${rbac.jwt.user-ttl}
     # 设置前端传递过来的令牌名称
-  user-token-name: authentication
+  user-token-name: ${rbac.jwt.user-token-name}
 
 logging:
   level:
