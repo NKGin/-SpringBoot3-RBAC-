@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  #启用哪一个环境配置
+  profiles:
+    active: dev
+  #开启循环依赖
+  main:
+    allow-circular-references: true
+  datasource:
+    url: jdbc:mysql://${rbac.datasource.host}:${rbac.datasource.port}/${rbac.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: ${rbac.datasource.driver-class-name}
+    username: ${rbac.datasource.username}
+    password: ${rbac.datasource.password}
+    druid:
+      initial-size: 20
+      min-idle: 20
+      max-active: 100
+      max-wait: 10000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 30000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: false
+  #redis配置信息
+  data:
+    redis:
+      host: ${rbac.redis.host}
+      password: ${rbac.redis.password}
+      port: ${rbac.redis.port}
+
+  jackson:
+    date-format: java.text.SimpleDateFormat
+    time-zone: GMT+8
+
+
+
+logging:
+  level:
+    com:
+      ginwind:
+        springrbac:
+          mapper: debug
+          service: info
+          controller: info
