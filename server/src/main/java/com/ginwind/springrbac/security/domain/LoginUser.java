@@ -1,5 +1,6 @@
 package com.ginwind.springrbac.security.domain;
 
+import com.ginwind.springrbac.constant.StatusConstant;
 import com.ginwind.springrbac.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -81,7 +82,7 @@ public class LoginUser implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return Objects.equals(status, "ACTIVE");
+        return Objects.equals(status, StatusConstant.ENABLE);
     }
 
 }

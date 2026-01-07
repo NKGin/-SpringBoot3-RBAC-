@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 
 
 import com.ginwind.springrbac.dto.LoginDTO;
+import com.ginwind.springrbac.properties.JwtProperties;
 import com.ginwind.springrbac.result.Result;
 import com.ginwind.springrbac.security.domain.LoginUser;
 import com.ginwind.springrbac.utils.JwtUtils;
@@ -24,13 +25,12 @@ import java.util.concurrent.TimeUnit;
 
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    private final JwtUtils jwtUtils;
     @Autowired
     private StringRedisTemplate  stringRedisTemplate;
+    @Autowired
+    private  JwtProperties jwtProperties;
 
-    public JwtLoginFilter(AuthenticationManager authenticationManager,
-                          JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
+    public JwtLoginFilter(AuthenticationManager authenticationManager) {
         setAuthenticationManager(authenticationManager);
         setFilterProcessesUrl("/login"); // 拦截登录接口
     }
@@ -73,12 +73,12 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             throws IOException {
 
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
-        String jwt = JwtUtils.generateToken(loginUser.getUsername(),loginUser.getAuthorities());
+        String jwt = JwtUtils.generateToken(jwtProperties.getAdminSecretKey(),loginUser.getUsername(),loginUser.getAuthorities());
 
         //jwt键
-        String tokenKey = "token_"+jwt;
+        String tokenKey = jwtProperties.getTokenRedisKey()+jwt;
         //存储redis白名单
-        stringRedisTemplate.opsForValue().set(tokenKey, jwt,JwtUtils.JWT_TTL/1000, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set(tokenKey, jwt,jwtProperties.getAdminTtl()/1000, TimeUnit.SECONDS);
 
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(JSON.toJSONString(Result.success(jwt))

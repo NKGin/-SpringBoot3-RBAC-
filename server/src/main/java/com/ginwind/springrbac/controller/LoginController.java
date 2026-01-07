@@ -2,6 +2,7 @@ package com.ginwind.springrbac.controller;
 
 
 import com.ginwind.springrbac.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +13,8 @@ public class LoginController {
     public LoginController(UserService userService) {
         this.userService = userService;
     }
+
+    @PreAuthorize("hasAnyAuthority('user:list')")
     @GetMapping("/hello")
     public String hello(){
 

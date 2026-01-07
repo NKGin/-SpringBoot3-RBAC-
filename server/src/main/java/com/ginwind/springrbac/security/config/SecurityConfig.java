@@ -29,18 +29,15 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final JwtAccessDeniedHandler accessDeniedHandler;
     private final LoginFailureHandler loginFailureHandler;
-    private final JwtUtils jwtUtils;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           JwtAuthenticationEntryPoint authenticationEntryPoint,
                           JwtAccessDeniedHandler accessDeniedHandler,
-                          LoginFailureHandler loginFailureHandler,
-                          JwtUtils jwtUtils) {
+                          LoginFailureHandler loginFailureHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.loginFailureHandler = loginFailureHandler;
-        this.jwtUtils = jwtUtils;
     }
 
     /**
@@ -67,7 +64,7 @@ public class SecurityConfig {
     public JwtLoginFilter jwtLoginFilter(AuthenticationManager authenticationManager) {
 
         JwtLoginFilter filter =
-                new JwtLoginFilter(authenticationManager, jwtUtils);
+                new JwtLoginFilter(authenticationManager);
 
         filter.setAuthenticationFailureHandler(loginFailureHandler);
         return filter;

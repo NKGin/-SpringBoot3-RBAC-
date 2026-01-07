@@ -35,7 +35,25 @@ spring:
     date-format: java.text.SimpleDateFormat
     time-zone: GMT+8
 
+jwt:
+    #管理端jwt配置
+    # 设置jwt签名加密时使用的秘钥
+  admin-secret-key: "ginwind_jwt_secret_key_1234567890123456"
+    # 设置jwt过期时间
+  admin-ttl: 3600000
+    # 设置前端传递过来的令牌名称
+  admin-token-name: token
+    # Token存储在redis里的键
+  token-redis-key: "token_"
 
+
+  # 用户端jwt配置
+    # 设置jwt签名加密时使用的秘钥
+  user-secret-key: itheima
+    # 设置jwt过期时间
+  user-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+  user-token-name: authentication
 
 logging:
   level:
