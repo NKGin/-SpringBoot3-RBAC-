@@ -28,7 +28,7 @@ spring:
   data:
     redis:
       host: ${rbac.redis.host}
-      password: ${rbac.redis.password}
+#      password: ${rbac.redis.password}
       port: ${rbac.redis.port}
 
   jackson:

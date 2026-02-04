@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+// 接口                         发生阶段                用户状态          处理的异常类型           常见 HTTP 码   对应的 Filter
+
+//AuthenticationFailureHandler 正在登录时 (POST /login) 正在验证身份      AuthenticationException (如 BadCredentialsException),401 或 重定向,UsernamePasswordAuthenticationFilter
 
 /**
  * 用户认证校验失败

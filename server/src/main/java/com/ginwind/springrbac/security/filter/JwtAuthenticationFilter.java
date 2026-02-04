@@ -1,37 +1,38 @@
 package com.ginwind.springrbac.security.filter;
 
-
+import com.ginwind.springrbac.constant.*;
 import com.ginwind.springrbac.properties.JwtProperties;
 import com.ginwind.springrbac.security.handler.*;
-import com.ginwind.springrbac.utils.JwtUtils;
+import com.ginwind.springrbac.utils.JwtUtil;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
+
 @Slf4j
-@Component
+// 1. 【移除】这里去掉了 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    // 2. 【修改】去掉 @Autowired，改为 final 修饰，确保必须通过构造函数注入
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtProperties jwtProperties;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private JwtProperties jwtProperties;
-
-    public JwtAuthenticationFilter(JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
+    // 3. 【新增】全参构造函数，外部实例化时必须把这些工具类传进来
+    public JwtAuthenticationFilter(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                   JwtProperties jwtProperties,
+                                   JwtUtil jwtUtil) {
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtProperties = jwtProperties;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -39,14 +40,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException, java.io.IOException {
-        String authHeader = request.getHeader("Authorization");
+        // ... 下面的业务逻辑保持不变 ...
+        // ... 代码省略，和原来一样 ...
+        String authHeader = request.getHeader(JwtClaimsConstant.TOKEN_HEADER);
 
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        if (HttpMethodConstant.OPTIONS.equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
-        // 1 没 token，直接放行
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+
+        if (authHeader == null || !authHeader.startsWith(JwtClaimsConstant.TOKEN_PREFIX)) {
             if (request.getRequestURI().contains("/login")
                     ||request.getRequestURI().contains("/logout")
                     ||request.getRequestURI().contains("/doc.html")
@@ -60,46 +63,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-
             String token = null;
             if (authHeader != null) {
-                token = authHeader.substring(7);
-                log.info("Token存在");
+                token = authHeader.substring(JwtClaimsConstant.TOKEN_PREFIX.length());
+                log.info("请求存在Token");
             }
 
-            // 2 token 非法，放行（交给 Security 返回 401/403）
-            if (!jwtUtils.validateToken(jwtProperties.getAdminSecretKey(),token)) {
+            if (!jwtUtil.validateToken(jwtProperties.getAdminSecretKey(),token)) {
                 log.info("Token非法");
                 filterChain.doFilter(request, response);
                 return;
             }
 
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // 1. 解析用户名 (填入 Principal)
-                String username = JwtUtils.getUsernameFromToken(jwtProperties.getAdminSecretKey(),token);
-
-                // 2. 解析权限 (填入 Authorities)
-                List<SimpleGrantedAuthority> authorities = JwtUtils.getAuthoritiesFromToken(jwtProperties.getAdminSecretKey(),token);
-
-                // 3. 构建完整的认证对象
+                String username = jwtUtil.getUsernameFromToken(jwtProperties.getAdminSecretKey(),token);
+                List<SimpleGrantedAuthority> authorities = jwtUtil.getAuthoritiesFromToken(jwtProperties.getAdminSecretKey(),token);
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                username,       // 参数1：用户名 (或者 UserDetails)
-                                null,           // 参数2：密码 (已认证不需要密码)
-                                authorities     // 参数3：刚才解析出来的权限列表
-                        );
-
-                // 4. 放入上下文
+                        new UsernamePasswordAuthenticationToken(username, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
         } catch (AuthenticationException e) {
             jwtAuthenticationEntryPoint.commence(request, response, e);
-            return; // 捕获异常后直接返回，避免继续放行
+            return;
         }
-        // 5放行
         filterChain.doFilter(request, response);
     }
 }
-

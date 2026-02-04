@@ -11,6 +11,22 @@ public class MessageConstant {
     public static final String ACCOUNT_BANED = "账号被禁用";
     public static final String ACCOUNT_LOCKED = "账号被锁定";
     public static final String ACCOUNT_EXPIRED = "账号已过期";
+    public static final String JWT_EXPIRED = "JWT已过期";
+    // 对应 SignatureException (密钥错误或Token被篡改)
+    public static final String JWT_SIGNATURE_INVALID = "JWT签名无效或被篡改";
+    // 对应 MalformedJwtException (格式不对，比如少了头部或尾部)
+    public static final String JWT_MALFORMED = "JWT令牌格式错误";
+    // 对应 UnsupportedJwtException (算法不匹配)
+    public static final String JWT_UNSUPPORTED = "不支持的JWT令牌";
+    // 对应 IllegalArgumentException (Token为空或null)
+    public static final String JWT_EMPTY = "JWT令牌为空";
+    // --- 2. 业务逻辑异常 (配合 Redis 校验) ---
+    // Token 格式对，但在 Redis 里找不到 (可能是注销了或被踢下线)
+    public static final String JWT_INVALID = "JWT令牌无效或已失效";
+    // 请求头里根本没带 Authorization 字段
+    public static final String JWT_MISSING = "请求头中缺少JWT令牌";
+    // 解析出来的用户不存在
+    public static final String JWT_USER_NOT_FOUND = "JWT令牌关联的用户不存在";
     public static final String UNKNOWN_ERROR = "未知错误";
     public static final String USER_NOT_LOGIN = "用户未登录";
     public static final String INSUFFICIENT_PERMISSIONS = "权限不足";

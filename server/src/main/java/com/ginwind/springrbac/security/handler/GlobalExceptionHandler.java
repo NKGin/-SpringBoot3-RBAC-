@@ -2,6 +2,7 @@ package com.ginwind.springrbac.security.handler;
 
 import com.ginwind.springrbac.constant.MessageConstant;
 import com.ginwind.springrbac.result.Result;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,4 +16,16 @@ public class GlobalExceptionHandler {
     public Result handleAccessDenied(AuthorizationDeniedException e) {
         return Result.error(MessageConstant.INSUFFICIENT_PERMISSIONS);
     }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    @ResponseBody
+    public Result handleAuthenticationCredentialsNotFound(AuthenticationCredentialsNotFoundException e) {
+        return  Result.error(e.getMessage());
+    }
+    @ExceptionHandler(io.jsonwebtoken.security.SecurityException.class)
+    @ResponseBody
+    public Result handleSecurityException(io.jsonwebtoken.security.SecurityException e) {
+        return  Result.error(e.getMessage());
+    }
+
 }

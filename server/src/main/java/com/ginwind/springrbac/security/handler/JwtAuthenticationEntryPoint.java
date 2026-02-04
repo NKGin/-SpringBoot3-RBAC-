@@ -2,6 +2,8 @@ package com.ginwind.springrbac.security.handler;
 
 import com.alibaba.fastjson.JSON;
 
+import com.ginwind.springrbac.constant.HttpMethodConstant;
+import com.ginwind.springrbac.constant.MessageConstant;
 import com.ginwind.springrbac.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,11 +47,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         // 设置响应内容类型和编码
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json;charset=UTF-8");
+        response.setCharacterEncoding(HttpMethodConstant.UTF_8);
+        response.setContentType(HttpMethodConstant.BODY_JSON);
 
         // 构建统一 JSON 响应
-        Result result = Result.error(authException.getMessage());
+        Result result = Result.error(MessageConstant.JWT_INVALID);
 
         // 返回给前端
         response.getWriter().write(JSON.toJSONString(result));
