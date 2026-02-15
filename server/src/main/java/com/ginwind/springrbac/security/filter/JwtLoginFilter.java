@@ -101,7 +101,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             // 正常返回
             response.setContentType(HttpMethodConstant.BODY_JSON);
             response.setCharacterEncoding(HttpMethodConstant.UTF_8);
-            response.getWriter().write(JSON.toJSONString(Result.success(new LoginVO(null,loginUser.getUsername(),jwt))));
+            response.getWriter().write(JSON.toJSONString(Result.success(new LoginVO(loginUser.getId(), loginUser.getUsername(),jwt))));
 
         } catch (Exception e) {
             // 3. 捕获 Redis 连接异常或其他异常

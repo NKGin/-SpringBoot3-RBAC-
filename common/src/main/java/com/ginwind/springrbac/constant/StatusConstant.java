@@ -6,8 +6,8 @@ package com.ginwind.springrbac.constant;
 public class StatusConstant {
 
     //启用
-    public static final String ENABLE = "ACTIVE";
+    public static final String ENABLE = "1";
 
     //禁用
-    public static final String DISABLE = "DISABLED";
+    public static final String DISABLE = "0";
 }

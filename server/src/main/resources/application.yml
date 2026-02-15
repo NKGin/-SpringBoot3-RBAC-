@@ -63,3 +63,7 @@ logging:
           mapper: debug
           service: info
           controller: info
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto # 强制全局默认自增

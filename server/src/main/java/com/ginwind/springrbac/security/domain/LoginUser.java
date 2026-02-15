@@ -18,7 +18,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 public class LoginUser implements UserDetails {
-
+    private Long id;
     private String username;
     private String password;
     private String status;

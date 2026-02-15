@@ -71,6 +71,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 5封装 LoginUser
         return LoginUser.builder()
+                .id(user.getId())
                 .password(user.getPassword())
                 .username(user.getUsername())
                 .status(user.getStatus())

@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // ... 下面的业务逻辑保持不变 ...
         // ... 代码省略，和原来一样 ...
         String authHeader = request.getHeader(JwtClaimsConstant.TOKEN_HEADER);
-
         if (HttpMethodConstant.OPTIONS.equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
@@ -65,7 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = null;
             if (authHeader != null) {
-                token = authHeader.substring(JwtClaimsConstant.TOKEN_PREFIX.length());
+                if (authHeader.startsWith(JwtClaimsConstant.TOKEN_PREFIX)) {token = authHeader.substring(JwtClaimsConstant.TOKEN_PREFIX.length());}
+                else  {token = authHeader;}
                 log.info("请求存在Token");
             }
 
