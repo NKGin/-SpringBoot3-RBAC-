@@ -13,8 +13,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-//@CrossOrigin(origins ="http://localhost:3000")
 
+/**
+ * 角色控制器
+ */
 @Slf4j
 @RestController
 @RequestMapping("/role")
@@ -33,7 +35,7 @@ public class RoleController {
     }
 
     /**
-     * 获取所有角色列表（用于用户管理中分配角色的下拉框）
+     * 查询所有角色
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('role:list')")
@@ -42,12 +44,12 @@ public class RoleController {
     }
 
     /**
-     * 获取角色详情（包含权限ID，用于回显）
+     * 根据ID查询角色详情
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('role:query')")
     public Result<RoleVO> getById(@PathVariable Integer id) {
-        log.info("角色id{},拥有的权限：{}", id,roleService.getRoleDetail(id).getPermissionIds());
+        log.info("角色id{},拥有的权限：{}", id, roleService.getRoleDetail(id).getPermissionIds());
         return Result.success(roleService.getRoleDetail(id));
     }
 
@@ -62,7 +64,7 @@ public class RoleController {
     }
 
     /**
-     * 修改角色（包含修改权限）
+     * 修改角色
      */
     @PutMapping
     @PreAuthorize("hasAuthority('role:edit')")

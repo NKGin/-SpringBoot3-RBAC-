@@ -1,11 +1,10 @@
 package com.ginwind.springrbac.dto;
 
 import lombok.Data;
-import java.io.Serializable;
 
 @Data
-public class UserPageDTO implements Serializable {
+public class UserPageDTO {
     private int page = 1;
     private int pageSize = 10;
-    private String username; // 支持按用户名模糊搜索
+    private String username;
 }

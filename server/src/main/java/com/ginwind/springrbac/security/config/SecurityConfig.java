@@ -26,6 +26,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Spring Security配置类
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -34,22 +37,24 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final JwtAccessDeniedHandler accessDeniedHandler;
     private final LoginFailureHandler loginFailureHandler;
-    private final JwtProperties jwtProperties; // 新增
+    private final JwtProperties jwtProperties;
     private final JwtUtil jwtUtil;
-
 
     public SecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint,
                           JwtAccessDeniedHandler accessDeniedHandler,
                           LoginFailureHandler loginFailureHandler,
                           JwtProperties jwtProperties,
-                          JwtUtil jwtUtil
-                          ) {
+                          JwtUtil jwtUtil) {
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.loginFailureHandler = loginFailureHandler;
         this.jwtProperties = jwtProperties;
         this.jwtUtil = jwtUtil;
     }
+
+    /**
+     * 配置跨域
+     */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -63,18 +68,25 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
+    /**
+     * 配置密码编码器
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * 配置认证管理器
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
     /**
-     * 登录 Filter（JSON 登录）
+     * 配置JWT登录过滤器
      */
     @Bean
     public JwtLoginFilter jwtLoginFilter(AuthenticationManager authenticationManager,
@@ -92,6 +104,10 @@ public class SecurityConfig {
         filter.setAuthenticationFailureHandler(loginFailureHandler);
         return filter;
     }
+
+    /**
+     * 配置安全过滤器链
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JwtLoginFilter jwtLoginFilter) throws Exception {
@@ -104,9 +120,7 @@ public class SecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
                 .formLogin(AbstractHttpConfigurer::disable)
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/login",
@@ -119,11 +133,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-
                 .addFilterAt(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)

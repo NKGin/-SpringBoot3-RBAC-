@@ -19,6 +19,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * JWT工具类
+ */
 @Slf4j
 @Component
 public class JwtUtil {
@@ -27,11 +30,9 @@ public class JwtUtil {
     private StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 生成 JWT token 并存入 Redis
-     * 去掉了 static，以便使用 stringRedisTemplate
+     * 生成JWT token并存入Redis
      */
     public String generateToken(String key, String username, long ttlMillis, Collection<? extends GrantedAuthority> permissions) {
-        // 1. 生成 Token
         Map<String, Object> claims = new HashMap<>();
         if (permissions != null && !permissions.isEmpty()) {
             claims.put(JwtClaimsConstant.PERMISSIONS, permissions
@@ -52,9 +53,6 @@ public class JwtUtil {
                 .signWith(getSecretKey(key), SignatureAlgorithm.HS256)
                 .compact();
 
-        // 2. 【补全逻辑】将 Token 存入 Redis，实现双重校验 (白名单机制)
-        // Key: token:eyJxh...  Value: username (或者存 1)
-        // 过期时间与 JWT 本身保持一致
         String redisKey = getTokenRedisKey(token);
         stringRedisTemplate.opsForValue().set(redisKey, username, ttlMillis, TimeUnit.MILLISECONDS);
 
@@ -62,8 +60,7 @@ public class JwtUtil {
     }
 
     /**
-     * 校验 Token 是否合法
-     * 修复了异常处理逻辑，统一返回 boolean，方便 Filter 调用
+     * 校验Token是否合法
      */
     public boolean validateToken(String key, String token) {
         if (!StringUtils.hasText(token)) {
@@ -71,14 +68,11 @@ public class JwtUtil {
         }
 
         try {
-            // 1. 校验 JWT 格式、签名、过期时间 (JJWT 库完成)
-            // 如果解析失败，parserBuilder 会直接抛出异常，进入 catch 块
             Jwts.parserBuilder()
                     .setSigningKey(getSecretKey(key))
                     .build()
                     .parseClaimsJws(token);
 
-            // 2. 校验 Redis 中是否存在 (处理注销/强制下线)
             String redisKey = getTokenRedisKey(token);
             String redisValue = stringRedisTemplate.opsForValue().get(redisKey);
 
@@ -91,8 +85,6 @@ public class JwtUtil {
 
         } catch (ExpiredJwtException e) {
             log.info("Token 已过期: {}", e.getMessage());
-            // 如果你希望在 Filter 层给前端返回具体的 "Token Expired" 错误码，
-            // 这里可以抛出自定义异常，但标准做法是返回 false，由 Filter 处理 401
             return false;
         } catch (SecurityException | MalformedJwtException e) {
             log.warn("Token 签名无效或格式错误: {}", e.getMessage());
@@ -104,8 +96,7 @@ public class JwtUtil {
     }
 
     /**
-     * 注销/删除 Token
-     * (新增方法，配合 validateToken 使用)
+     * 注销/删除Token
      */
     public void deleteToken(String token) {
         if (StringUtils.hasText(token)) {
@@ -114,8 +105,7 @@ public class JwtUtil {
     }
 
     /**
-     * 解析 Claims
-     * 去掉 static
+     * 解析Claims
      */
     public Claims getClaimsFromToken(String key, String token) {
         try {
@@ -126,13 +116,12 @@ public class JwtUtil {
                     .getBody();
         } catch (Exception e) {
             log.error("解析 Token Claims 失败", e);
-            throw new RuntimeException("无法解析 Token"); // 或者抛出自定义异常
+            throw new RuntimeException("无法解析 Token");
         }
     }
 
     /**
      * 获取用户名
-     * 去掉 static
      */
     public String getUsernameFromToken(String key, String token) {
         try {
@@ -144,7 +133,6 @@ public class JwtUtil {
 
     /**
      * 获取权限列表
-     * 去掉 static
      */
     public List<SimpleGrantedAuthority> getAuthoritiesFromToken(String key, String token) {
         try {
@@ -164,11 +152,17 @@ public class JwtUtil {
         }
     }
 
+    /**
+     * 获取密钥
+     */
     private SecretKey getSecretKey(String key) {
         return Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 获取Token的Redis Key
+     */
     private String getTokenRedisKey(String token) {
-        return RedisKey.TOKEN.getPrefix()+token;
+        return RedisKey.TOKEN.getPrefix() + token;
     }
 }

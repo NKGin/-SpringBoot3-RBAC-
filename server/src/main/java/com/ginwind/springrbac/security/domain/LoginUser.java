@@ -22,12 +22,8 @@ public class LoginUser implements UserDetails {
     private String username;
     private String password;
     private String status;
-    private final List<String> permissions; // 权限列表
+    private final List<String> permissions;
 
-
-    /**
-     * Spring Security 真正使用的权限对象
-     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -37,53 +33,34 @@ public class LoginUser implements UserDetails {
         return authorities;
     }
 
-    /**
-     * 密码（数据库里的）
-     */
     @Override
     public String getPassword() {
         return password;
     }
 
-    /**
-     * 用户名
-     */
     @Override
     public String getUsername() {
         return username;
     }
 
-    /**
-     * 账户是否未过期
-     */
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
-    /**
-     * 账户是否未锁定
-     */
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
-    /**
-     * 凭证是否未过期
-     */
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
-    /**
-     * 是否启用（可以绑定用户状态）
-     */
     @Override
     public boolean isEnabled() {
         return Objects.equals(status, StatusConstant.ENABLE);
     }
-
 }
 

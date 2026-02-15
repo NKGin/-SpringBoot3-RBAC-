@@ -15,8 +15,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-//@CrossOrigin(origins ="http://localhost:3000")
 
+/**
+ * 用户控制器
+ */
 @Slf4j
 @RestController
 @RequestMapping("/user")
@@ -56,7 +58,7 @@ public class UserController {
     }
 
     /**
-     * 根据ID获取用户详情（用于回显）
+     * 根据ID查询用户详情
      */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:list')")
@@ -71,7 +73,6 @@ public class UserController {
     @DeleteMapping("/{ids}")
     @PreAuthorize("hasAuthority('user:delete')")
     public Result delete(@PathVariable List<Long> ids) {
-        // 防止删除当前登录用户或超级管理员（可选逻辑）
         if (ids.contains(1L)) {
             return Result.error("不可删除管理员");
         }
@@ -80,18 +81,18 @@ public class UserController {
     }
 
     /**
-     * 启用/禁用账号
+     * 启用/禁用用户
      */
     @PostMapping("/status/{id}/{status}")
     @PreAuthorize("hasAuthority('user:update')")
     public Result status(@PathVariable Long id, @PathVariable String status) {
-        log.info("启用/禁用账号:传入参数id：{}，status：{}",id,status);
+        log.info("启用/禁用账号:传入参数id：{}，status：{}", id, status);
         userService.updateStatus(id, status);
         return Result.success();
     }
 
     /**
-     * 重置密码 (管理员操作)
+     * 重置用户密码
      */
     @PutMapping("/resetPassword/{id}")
     @PreAuthorize("hasAuthority('user:update')")
@@ -101,11 +102,10 @@ public class UserController {
     }
 
     /**
-     * 修改个人密码
+     * 修改密码
      */
     @PutMapping("/editPassword")
     public Result editPassword(@RequestBody PasswordEditDTO passwordEditDTO) {
-        // 强制设置当前登录用户ID，防止修改他人密码
         passwordEditDTO.setUserId(SecurityUtils.getCurrentUserId());
         try {
             userService.editPassword(passwordEditDTO);

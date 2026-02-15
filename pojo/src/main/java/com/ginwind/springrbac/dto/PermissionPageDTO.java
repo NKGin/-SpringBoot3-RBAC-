@@ -1,11 +1,10 @@
 package com.ginwind.springrbac.dto;
 
 import lombok.Data;
-import java.io.Serializable;
 
 @Data
-public class PermissionPageDTO implements Serializable {
+public class PermissionPageDTO {
     private int page = 1;
     private int pageSize = 10;
-    private String name; // 按权限名称搜索
+    private String name;
 }

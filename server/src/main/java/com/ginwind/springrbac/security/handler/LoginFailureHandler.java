@@ -1,7 +1,6 @@
 package com.ginwind.springrbac.security.handler;
 
 import com.alibaba.fastjson.JSON;
-
 import com.ginwind.springrbac.constant.MessageConstant;
 import com.ginwind.springrbac.result.Result;
 import jakarta.servlet.ServletException;
@@ -15,13 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-// 接口                         发生阶段                用户状态          处理的异常类型           常见 HTTP 码   对应的 Filter
 
-//AuthenticationFailureHandler 正在登录时 (POST /login) 正在验证身份      AuthenticationException (如 BadCredentialsException),401 或 重定向,UsernamePasswordAuthenticationFilter
-
-/**
- * 用户认证校验失败
- */
 @Component
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 
@@ -34,20 +27,16 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
 
         if (exception instanceof BadCredentialsException) {
             msg = MessageConstant.LOGIN_ERROR;
-
         } else if (exception instanceof LockedException) {
             msg = MessageConstant.ACCOUNT_LOCKED;
-
         } else if (exception instanceof DisabledException) {
             msg = MessageConstant.ACCOUNT_BANED;
-
         } else if (exception instanceof AccountExpiredException) {
             msg = MessageConstant.ACCOUNT_EXPIRED;
-
         } else if (exception instanceof CredentialsExpiredException) {
             msg = MessageConstant.PASSWORD_EXPIRED;
         } else {
-            msg =  exception.getMessage();
+            msg = exception.getMessage();
         }
 
         String jsonstring = JSON.toJSONString(Result.error(msg));

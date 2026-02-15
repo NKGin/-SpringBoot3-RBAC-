@@ -10,8 +10,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-// 接口                 发生阶段   用户状态          处理的异常类型           常见 HTTP 码   对应的 Filter
-// AccessDeniedHandler 访问资源时  已登录 (权限不足)  AccessDeniedException 403 Forbidden ExceptionTranslationFilter
+
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
@@ -21,7 +20,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException {
 
         response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.getWriter().write(
                 JSON.toJSONString(
                         Result.error(MessageConstant.INSUFFICIENT_PERMISSIONS)

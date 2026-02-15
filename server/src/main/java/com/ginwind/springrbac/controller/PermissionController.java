@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins ="http://localhost:3000")
+/**
+ * 权限控制器
+ */
 @RestController
 @RequestMapping("/permission")
 public class PermissionController {
@@ -20,18 +22,27 @@ public class PermissionController {
     @Autowired
     private PermissionService permissionService;
 
+    /**
+     * 分页查询权限
+     */
     @GetMapping("/page")
     @PreAuthorize("hasAuthority('permission:list')")
     public Result<Page<Permission>> page(PermissionPageDTO dto) {
         return Result.success(permissionService.pageQuery(dto));
     }
 
+    /**
+     * 查询所有权限
+     */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('permission:list')")
     public Result<List<Permission>> list() {
         return Result.success(permissionService.list());
     }
 
+    /**
+     * 新增权限
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('permission:add')")
     public Result save(@RequestBody PermissionDTO dto) {
@@ -39,6 +50,9 @@ public class PermissionController {
         return Result.success();
     }
 
+    /**
+     * 修改权限
+     */
     @PutMapping
     @PreAuthorize("hasAuthority('permission:edit')")
     public Result update(@RequestBody PermissionDTO dto) {
@@ -46,10 +60,12 @@ public class PermissionController {
         return Result.success();
     }
 
+    /**
+     * 删除权限
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('permission:remove')")
     public Result delete(@PathVariable Integer id) {
-        // TODO: 可选增强 - 检查是否有角色关联了该权限，如果有则禁止删除
         permissionService.removeById(id);
         return Result.success();
     }

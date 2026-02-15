@@ -32,12 +32,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private PermissionMapper permissionMapper;
 
     @Override
-    public UserDetails loadUserByUsername(String username){
-        if (username.isEmpty()){
+    public UserDetails loadUserByUsername(String username) {
+        if (username.isEmpty()) {
             throw new InternalAuthenticationServiceException("用户名为空");
         }
 
-        // 1查询用户
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username);
         User user = userMapper.selectOne(queryWrapper);
@@ -45,7 +44,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException("用户不存在");
         }
 
-        // 2查询用户角色
         QueryWrapper<UserRole> userRoleWrapper = new QueryWrapper<>();
         userRoleWrapper.eq("user_id", user.getId());
         List<UserRole> userRoles = userRoleMapper.selectList(userRoleWrapper);
@@ -53,7 +51,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(UserRole::getRoleId)
                 .collect(Collectors.toList());
 
-        // 3查询角色对应的权限
         QueryWrapper<RolePermission> rolePermWrapper = new QueryWrapper<>();
         rolePermWrapper.in("role_id", roleIds);
         List<RolePermission> rolePermissions = rolePermissionMapper.selectList(rolePermWrapper);
@@ -62,14 +59,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // 4查询权限名
         List<String> permissions = permissionMapper.selectBatchIds(permIds)
                 .stream()
                 .map(Permission::getPermissionName)
                 .collect(Collectors.toList());
         log.info(permissions.toString());
 
-        // 5封装 LoginUser
         return LoginUser.builder()
                 .id(user.getId())
                 .password(user.getPassword())

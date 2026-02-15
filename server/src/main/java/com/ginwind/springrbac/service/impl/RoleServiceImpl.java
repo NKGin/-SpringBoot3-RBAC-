@@ -24,15 +24,23 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+/**
+ * 角色服务实现类
+ */
 @Slf4j
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
+
     @Autowired
     private UserRoleMapper userRoleMapper;
 
+    /**
+     * 分页查询角色
+     */
     @Override
     public Page<Role> pageQuery(RolePageDTO dto) {
         Page<Role> page = new Page<>(dto.getPage(), dto.getPageSize());
@@ -42,25 +50,28 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         return this.page(page, wrapper);
     }
 
+    /**
+     * 保存角色
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveRole(RoleDTO roleDTO) {
-        // 1. 判重
         LambdaQueryWrapper<Role> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Role::getRoleName, roleDTO.getRoleName());
         if (this.count(wrapper) > 0) {
             throw new RuntimeException(MessageConstant.ALREADY_EXIST);
         }
 
-        // 2. 保存角色
         Role role = new Role();
         BeanUtils.copyProperties(roleDTO, role);
         this.save(role);
 
-        // 3. 保存角色-权限关联
         saveRolePermissions(role.getId(), roleDTO.getPermissionIds());
     }
 
+    /**
+     * 更新角色
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateRole(RoleDTO roleDTO) {
@@ -69,35 +80,36 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         BeanUtils.copyProperties(roleDTO, role);
         this.updateById(role);
 
-        // 1. 删除旧的权限关联
         LambdaQueryWrapper<RolePermission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RolePermission::getRoleId, roleDTO.getId());
         rolePermissionMapper.delete(wrapper);
 
-        // 2. 插入新的权限关联
         saveRolePermissions(roleDTO.getId(), roleDTO.getPermissionIds());
         log.info("修改成功");
     }
 
+    /**
+     * 删除角色
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteRole(Integer id) {
-        // 1. 检查是否有用户关联了该角色
         LambdaQueryWrapper<UserRole> userRoleWrapper = new LambdaQueryWrapper<>();
         userRoleWrapper.eq(UserRole::getRoleId, id);
         if (userRoleMapper.selectCount(userRoleWrapper) > 0) {
             throw new RuntimeException("当前角色已分配给用户，无法删除");
         }
 
-        // 2. 删除角色
         this.removeById(id);
 
-        // 3. 删除角色-权限关联
         LambdaQueryWrapper<RolePermission> rpWrapper = new LambdaQueryWrapper<>();
         rpWrapper.eq(RolePermission::getRoleId, id);
         rolePermissionMapper.delete(rpWrapper);
     }
 
+    /**
+     * 获取角色详情
+     */
     @Override
     public RoleVO getRoleDetail(Integer id) {
         Role role = this.getById(id);
@@ -107,7 +119,6 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         RoleVO vo = new RoleVO();
         BeanUtils.copyProperties(role, vo);
 
-        // 查询关联的权限ID列表
         LambdaQueryWrapper<RolePermission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(RolePermission::getRoleId, id);
         List<Integer> permIds = rolePermissionMapper.selectList(wrapper).stream()
@@ -119,11 +130,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     /**
-     * 辅助方法：批量保存角色权限
+     * 保存角色权限关联
      */
     private void saveRolePermissions(Integer roleId, List<Integer> permissionIds) {
         if (permissionIds != null && !permissionIds.isEmpty()) {
-            // 建议使用 MybatisPlus 的 saveBatch，这里演示基本逻辑
             for (Integer permId : permissionIds) {
                 RolePermission rp = new RolePermission();
                 rp.setRoleId(roleId);

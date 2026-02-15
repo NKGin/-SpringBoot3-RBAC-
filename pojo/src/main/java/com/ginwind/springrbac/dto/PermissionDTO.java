@@ -1,13 +1,35 @@
 package com.ginwind.springrbac.dto;
 
 import lombok.Data;
-import java.io.Serializable;
 
+/**
+ * 权限DTO
+ */
 @Data
-public class PermissionDTO implements Serializable {
+public class PermissionDTO {
+
+    /**
+     * 权限ID
+     */
     private Integer id;
+
+    /**
+     * 权限名称
+     */
     private String permissionName;
-    private String permissionPath; // 路径，如 /user/**
-    private String permissionMethod; // 方法，如 GET, POST
+
+    /**
+     * 权限路径
+     */
+    private String permissionPath;
+
+    /**
+     * 权限方法
+     */
+    private String permissionMethod;
+
+    /**
+     * 权限描述
+     */
     private String description;
 }

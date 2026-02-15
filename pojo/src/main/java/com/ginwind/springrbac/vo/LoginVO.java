@@ -4,16 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.io.Serializable;
 
 /**
- * 登录视图对象
+ * 登录响应VO
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginVO implements Serializable {
+public class LoginVO {
 
     /**
      * 用户ID
@@ -26,7 +25,7 @@ public class LoginVO implements Serializable {
     private String userName;
 
     /**
-     * 认证Token
+     * JWT令牌
      */
     private String token;
 }

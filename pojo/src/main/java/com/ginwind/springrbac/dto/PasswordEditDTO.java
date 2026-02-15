@@ -1,10 +1,9 @@
 package com.ginwind.springrbac.dto;
 
 import lombok.Data;
-import java.io.Serializable;
 
 @Data
-public class PasswordEditDTO implements Serializable {
+public class PasswordEditDTO {
     private Long userId;
     private String oldPassword;
     private String newPassword;

@@ -13,9 +13,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+/**
+ * 权限服务实现类
+ */
 @Service
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {
 
+    /**
+     * 分页查询权限
+     */
     @Override
     public Page<Permission> pageQuery(PermissionPageDTO dto) {
         Page<Permission> page = new Page<>(dto.getPage(), dto.getPageSize());
@@ -25,9 +31,11 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         return this.page(page, wrapper);
     }
 
+    /**
+     * 保存权限
+     */
     @Override
     public void savePermission(PermissionDTO dto) {
-        // 校验是否存在相同的路径+方法
         LambdaQueryWrapper<Permission> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Permission::getPermissionPath, dto.getPermissionPath())
                 .eq(Permission::getPermissionMethod, dto.getPermissionMethod());
@@ -39,6 +47,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         this.save(permission);
     }
 
+    /**
+     * 更新权限
+     */
     @Override
     public void updatePermission(PermissionDTO dto) {
         Permission permission = new Permission();

@@ -26,26 +26,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 用户服务实现类
+ */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
     private UserRoleMapper userRoleMapper;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * 分页查询用户
+     */
     @Override
     public Page<UserVO> pageQuery(UserPageDTO dto) {
         Page<User> page = new Page<>(dto.getPage(), dto.getPageSize());
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
 
-        // 模糊查询用户名
         wrapper.like(StringUtils.hasText(dto.getUsername()), User::getUsername, dto.getUsername())
                 .orderByDesc(User::getCreateTime);
 
         Page<User> userPage = this.page(page, wrapper);
 
-        // 转换 Entity -> VO
         List<UserVO> voList = userPage.getRecords().stream().map(user -> {
             UserVO vo = new UserVO();
             BeanUtils.copyProperties(user, vo);
@@ -59,29 +64,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return voPage;
     }
 
+    /**
+     * 保存用户
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveUser(UserDTO userDTO) {
-        // 1. 校验用户名唯一
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, userDTO.getUsername());
         if (this.count(wrapper) > 0) {
             throw new RuntimeException(MessageConstant.ALREADY_EXIST);
         }
 
-        // 2. 保存用户基本信息
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
         user.setId(null);
-        // 设置默认密码并加密
         user.setPassword(passwordEncoder.encode(PasswordConstant.DEFAULT_PASSWORD));
         user.setStatus(StatusConstant.ENABLE);
         this.save(user);
 
-        // 3. 保存用户角色关联
         saveUserRoles(user.getId(), userDTO.getRoleIds());
     }
 
+    /**
+     * 更新用户
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateUser(UserDTO userDTO) {
@@ -89,7 +96,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtils.copyProperties(userDTO, user);
         this.updateById(user);
 
-        // 更新角色：先删除旧关系，再插入新关系
         LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserRole::getUserId, userDTO.getId());
         userRoleMapper.delete(wrapper);
@@ -97,29 +103,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         saveUserRoles(userDTO.getId(), userDTO.getRoleIds());
     }
 
+    /**
+     * 批量删除用户
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteBatch(List<Long> ids) {
         if (ids == null || ids.isEmpty()) return;
 
-        // 1. 先删除关联表（解除外键绑定）
         LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.in(UserRole::getUserId, ids);
         userRoleMapper.delete(wrapper);
 
-        // 2. 再删除用户表
         boolean result = this.removeByIds(ids);
         System.out.println("用户表删除结果: " + result);
     }
 
+    /**
+     * 更新用户状态
+     */
     @Override
     public void updateStatus(Long id, String status) {
-        User user = User.builder().id(id).status(status).build(); // 假设User加了@Builder，或者用setter
-        // 如果User没加@Builder注解，用下面方式：
-        // User user = new User(); user.setId(id); user.setStatus(status);
+        User user = User.builder().id(id).status(status).build();
         this.updateById(user);
     }
 
+    /**
+     * 重置用户密码
+     */
     @Override
     public void resetPassword(Long id) {
         User user = new User();
@@ -128,9 +139,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.updateById(user);
     }
 
+    /**
+     * 修改密码
+     */
     @Override
     public void editPassword(PasswordEditDTO dto) {
-        // 只能修改自己的密码，或者在Controller层控制
         User user = this.getById(dto.getUserId());
         if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
             throw new RuntimeException(MessageConstant.PASSWORD_ERROR);
@@ -139,13 +152,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.updateById(user);
     }
 
+    /**
+     * 获取用户详情
+     */
     @Override
     public UserVO getUserDetail(Long id) {
         User user = this.getById(id);
         UserVO vo = new UserVO();
         BeanUtils.copyProperties(user, vo);
 
-        // 查询角色ID列表
         LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserRole::getUserId, id);
         List<Integer> roleIds = userRoleMapper.selectList(wrapper).stream()
@@ -157,7 +172,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 辅助方法：保存用户角色关系
+     * 保存用户角色关联
      */
     private void saveUserRoles(Long userId, List<Integer> roleIds) {
         if (roleIds != null && !roleIds.isEmpty()) {
@@ -168,8 +183,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 ur.setRoleId(roleId);
                 userRoles.add(ur);
             }
-            // 批量插入需要 Mapper 支持，或者循环插入
-            // 这里演示循环插入，实际生产建议使用 MyBatisPlus 的 saveBatch
             userRoles.forEach(userRoleMapper::insert);
         }
     }

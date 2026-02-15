@@ -4,23 +4,46 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+/**
+ * JWT配置属性
+ */
 @Component
 @ConfigurationProperties(prefix = "jwt")
 @Data
 public class JwtProperties {
 
     /**
-     * 管理端员工生成jwt令牌相关配置
+     * 管理端密钥
      */
     private String adminSecretKey;
-    private long adminTtl;
-    private String adminTokenName;
-    private String tokenRedisKey;
+
     /**
-     * 用户端微信用户生成jwt令牌相关配置
+     * 管理端Token有效期
+     */
+    private long adminTtl;
+
+    /**
+     * 管理端Token名称
+     */
+    private String adminTokenName;
+
+    /**
+     * Token Redis Key
+     */
+    private String tokenRedisKey;
+
+    /**
+     * 用户端密钥
      */
     private String userSecretKey;
-    private long userTtl;
-    private String userTokenName;
 
+    /**
+     * 用户端Token有效期
+     */
+    private long userTtl;
+
+    /**
+     * 用户端Token名称
+     */
+    private String userTokenName;
 }

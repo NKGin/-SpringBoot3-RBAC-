@@ -23,15 +23,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * JWT登录过滤器
+ */
 @Slf4j
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
-    // 1. 去掉 @Autowired，改为 final，避免空指针风险
     private final StringRedisTemplate stringRedisTemplate;
     private final JwtProperties jwtProperties;
     private final JwtUtil jwtUtil;
 
-    // 2. 修改构造函数，强制要求传入 Redis 和 配置类
     public JwtLoginFilter(AuthenticationManager authenticationManager,
                           StringRedisTemplate stringRedisTemplate,
                           JwtProperties jwtProperties, JwtUtil jwtUtil) {
@@ -39,11 +40,13 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         this.jwtProperties = jwtProperties;
         this.jwtUtil = jwtUtil;
 
-        // 配置父类
         setAuthenticationManager(authenticationManager);
-        setFilterProcessesUrl("/login"); // 拦截登录接口
+        setFilterProcessesUrl("/login");
     }
 
+    /**
+     * 尝试认证
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response)
@@ -55,7 +58,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
                     LoginDTO.class
             );
 
-            // 防止空指针
             if (loginRequest == null) {
                 loginRequest = new LoginDTO();
             }
@@ -72,6 +74,9 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
+    /**
+     * 认证成功处理
+     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
@@ -82,14 +87,12 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
 
         try {
-            // 生成 Token
             String jwt = jwtUtil.generateToken(
                     jwtProperties.getAdminSecretKey(),
                     loginUser.getUsername(),
                     jwtProperties.getAdminTtl(),
                     loginUser.getAuthorities());
 
-            // 存入 Redis（这里是最容易报错的地方）
             String tokenKey = jwtProperties.getTokenRedisKey() + jwt;
             stringRedisTemplate.opsForValue().set(
                     tokenKey,
@@ -98,20 +101,16 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
                     TimeUnit.SECONDS
             );
 
-            // 正常返回
             response.setContentType(HttpMethodConstant.BODY_JSON);
             response.setCharacterEncoding(HttpMethodConstant.UTF_8);
-            response.getWriter().write(JSON.toJSONString(Result.success(new LoginVO(loginUser.getId(), loginUser.getUsername(),jwt))));
+            response.getWriter().write(JSON.toJSONString(Result.success(new LoginVO(loginUser.getId(), loginUser.getUsername(), jwt))));
 
         } catch (Exception e) {
-            // 3. 捕获 Redis 连接异常或其他异常
             log.error("登录认证成功，但后续处理（如Redis）失败: {}", e.getMessage());
 
-            // 手动设置 500 状态码
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType(HttpMethodConstant.BODY_JSON);
 
-            // 返回 JSON 格式的错误信息
             Result<?> errorResult = Result.error("登录成功，但系统内部错误（可能是Redis连接失败）");
             response.getWriter().write(JSON.toJSONString(errorResult));
         }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 /**
@@ -34,7 +35,7 @@ public class Permission {
     private String permissionPath;
 
     /**
-     * 请求方法 (GET/POST等)
+     * 权限方法
      */
     @TableField("method")
     private String permissionMethod;

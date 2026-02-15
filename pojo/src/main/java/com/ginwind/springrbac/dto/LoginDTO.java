@@ -1,13 +1,12 @@
 package com.ginwind.springrbac.dto;
 
 import lombok.Data;
-import java.io.Serializable;
 
 /**
- * 登录传输对象
+ * 登录请求DTO
  */
 @Data
-public class LoginDTO implements Serializable {
+public class LoginDTO {
 
     /**
      * 用户名
